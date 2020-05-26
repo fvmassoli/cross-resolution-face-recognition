@@ -4,10 +4,12 @@ This repository contains the code relative to the paper "[Cross-resolution learn
 
 It reports a new training procedure for cross-resolution robust deep neural network. 
 
+(WIP ... all the code will be soon available)
+
 ## Cross-resolution training
 
 <p align="center">
-<img src="https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/paper_training_algorithm.png" alt="Training algorithm" width="600" height="350">
+<img src="https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/paper_training_algorithm.png" alt="Training algorithm" width="620" height="310">
 </p>
 
 <p align="center">
