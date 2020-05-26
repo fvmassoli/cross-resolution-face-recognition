@@ -1,8 +1,14 @@
-### Extract features from ijb-b data set
-python2 -W ignore main.py -g -dn ijbb -rm extr_feat -ft -ckp ...model_.._.pth 
+# Cross-resolution learning for Face Recognition
 
-### Train the model on VGGFace2 data set with teacher and torchvion-like senet50
-python2 -W ignore main.py -g -dn vggface2 -rm train -tm -se -lt -ll 0.1 -lp 0.7 -lr 0.1 -m 0.9 -sv 30 -c -cs 45000 -e 40 -s | tee out.txt
+This repository contains the code relative to the paper "[Cross-resolution learning for Face Recognition](https://www.sciencedirect.com/science/article/pii/S0262885620300597)" by Fabio Valerio Massoli (ISTI - CNR), Fabrizio Falchi (ISTI - CNR), and Giuseppe Amato (ISTI - CNR).
 
-### Train the model on VGGFace2-500
-python2 -W ignore main.py -g -dn vggface2-500 -rm train -lr 0.01 -m 0.9 -fn -e 40 -s -sv 50 -sp 10 | tee out.txt
+It reports a new training procedure for cross-resolution robust deep neural network. 
+
+### Cross-resolution training
+
+![alt text](https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/paper_training_algorithm.pdf  "Training algorithm")
+
+![alt text](https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/vggface_tsne_base_ft_models_8.pdf  "t-SNE")
+
+
+
