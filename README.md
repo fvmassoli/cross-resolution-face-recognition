@@ -4,17 +4,23 @@ This repository contains the code relative to the paper "[Cross-resolution learn
 
 It reports a new training procedure for cross-resolution robust deep neural network. 
 
-(WIP ... all the code will be soon available)
+**(WIP ... all the code will be soon available)**
 
 ## Cross-resolution training
 
+Proposed training approach
+
 <p align="center">
-<img src="https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/paper_training_algorithm.png" alt="Training algorithm" width="620" height="310">
+<img src="https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/paper_training_algorithm.png"  alt="t-SNE" width="600" height="300">
 </p>
+
+
+2D t-SNE embeddings for 20 different identities randomly extracted from the VGGFace2 dataset. All the images were down-sampled to a resolution of 8 pixels. Left: “Base Model”. Right: model trained with our approach.
 
 <p align="center">
 <img src="https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/vggface_tsne_base_ft_models_8.png" alt="t-SNE" width="700" height="300">
 </p>
+
 
 ## Reference
 For all the details about the training procedure and the experimental results, please have a look at the [paper](https://www.sciencedirect.com/science/article/pii/S0262885620300597).
