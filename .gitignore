@@ -1,0 +1,7 @@
+*.txt
+*.pyc
+*pycache*
+*.npy
+*.pth
+*.ipynb
+*.sh
