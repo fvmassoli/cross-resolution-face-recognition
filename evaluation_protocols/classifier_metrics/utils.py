@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 def pickle_unpickle_file(model_folder, data_set_name, date, file_name=None, obj=None, save=False, load=False):
 
-    analysis_output_folder = '/mnt/datone/low_resolution_face_recognition_output/analysis_outputs_new_output_features'
+    analysis_output_folder = 'analysis_output'
     output_path = os.path.join(analysis_output_folder, model_folder, data_set_name, date)
 
     f_name = os.path.join(output_path, file_name)
