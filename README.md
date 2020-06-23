@@ -39,7 +39,7 @@ For all the details about the training procedure and the experimental results, p
 ## Contacts
 If you have any question about our work, please contact [Dr. Fabio Valerio Massoli](mailto:fabio.massoli@isti.cnr.it). 
 
-We make our trained model available to researchers upon request to: [Dr. Fabio Valerio Massoli](mailto:fabio.massoli@isti.cnr.it).
+We make our cross-resolution best model available to researchers upon request to: [Dr. Fabio Valerio Massoli](mailto:fabio.massoli@isti.cnr.it).
 
 
 Have fun! :-D
