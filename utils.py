@@ -1,5 +1,7 @@
 import os
+
 import torch
+import torchvision.transforms as t
 
 
 def load_models(model_base_path, device="cpu", model_ckp=None):
@@ -36,3 +38,28 @@ def save_model_checkpoint(best_acc, batch_idx, epoch, model_state_dict, out_dir,
             f"\nAt iter: {batch_idx}"
             f"\nModel saved at: {file_name}"
         )
+
+
+def get_transforms(resize=256, grayed_prob=0.2, crop_size=224):
+    def subtract_mean(x):
+        mean_vector = [91.4953, 103.8827, 131.0912]
+        x *= 255.
+        x[0] -= mean_vector[0]
+        x[1] -= mean_vector[1]
+        x[2] -= mean_vector[2]
+        return x
+    if mode=='train':
+        return t.Compose([
+                    t.Resize(resize),
+                    t.RandomGrayscale(p=grayed_prob),
+                    t.RandomCrop(crop_size),
+                    t.ToTensor(),
+                    t.Lambda(lambda x: self._subtract_mean(x))
+                ])
+    else:
+        return t.Compose([
+                    t.Resize(resize),
+                    t.CenterCrop(crop_size),
+                    t.ToTensor(),
+                    t.Lambda(lambda x: self._subtract_mean(x))
+                ])
