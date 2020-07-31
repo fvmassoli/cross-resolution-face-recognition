@@ -27,6 +27,7 @@ parser.add_argument('-ckp', '--model-ckp', help='Path to fine tuned model checkp
 parser.add_argument('-sr', '--super-resolved-images', action='store_true',
                 help='Extract features from SR images. It is only valid for QMUL and Tinyface (default: False)')
 # Training Options
+parser.add_argument('-dp', '--dset-base-path', help='Base path to datasets')
 parser.add_argument('-l', '--lambda_', default=0.2, type=float,
                 help='Lambda for features regression loss (default: 0.2)')
 parser.add_argument('-lr', '--learning-rate', default=0.001, type=float, help='Learning rate (default: 1.e-3)')
@@ -107,14 +108,15 @@ scheduler = ReduceLROnPlateau(
 
 # ---------------------------- LOAD DATA ---------------------------------------
 data_manager = DataManager(
-                        test=args.run_mode == 'test',
-                        data_set_name=args.dataset,
+                        dset_base_path=args.dset_base_path,
+                        dataset_name=args.dataset,
                         super_resolved_images=args.super_resolved_images,
                         device=device,
                         run_mode=args.run_mode,
                         lowering_resolution_prob=args.lower_resolution_prob,
                         curriculum=args.curriculum,
-                        curr_step_iterations=args.curr_step_iterations
+                        curr_step_iterations=args.curr_step_iterations,
+                        logging=logging
                     )
 # ------------------------------------------------------------------------------
 

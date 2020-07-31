@@ -125,7 +125,7 @@ class RunManager(object):
             'Model validation on down sampled images',
             'Model validation on original images',
             'Model test'
-        ] if self._data_set_name == 'vggface2' else [
+        ] if self._dataset_path == 'vggface2' else [
                                                  'Model Validation',
                                                  'Model Test'
                                                 ]
@@ -134,7 +134,7 @@ class RunManager(object):
             if test_model:
                 loaders_indices = [2]
             else:
-                if self._data_set_name == 'vggface2':
+                if self._dataset_path == 'vggface2':
                     loaders_indices = [2, 1]
                 else:
                     loaders_indices = [1]
@@ -171,7 +171,7 @@ class RunManager(object):
                 if test_model:
                     print('\tTest loss: {:.3f} --- Test acc: {:.2f}%'.format(loss_, acc_))
                 else:
-                    if self._data_set_name == 'vggface2':
+                    if self._dataset_path == 'vggface2':
                         if loader_idx == 1:
                             print('\tValid loss down sampled imgs: {:.3f} --- Valid acc down sampled imgs: {:.2f}%'.format(loss_, acc_))
                         else:
