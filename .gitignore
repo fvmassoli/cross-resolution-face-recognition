@@ -11,3 +11,10 @@
 *.jpg
 *.pdf
 *.save
+*.png
+*.csv
+*.prototxt
+*.tar
+*.pt
+*__init__*
+*.pyc
