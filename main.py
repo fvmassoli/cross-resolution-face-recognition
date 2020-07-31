@@ -39,6 +39,7 @@ parser.add_argument('-rs', '--train-steps', type=int, default=2,
 parser.add_argument('-c', '--curriculum', action='store_true', help='Use curriculum learning (default: False)')
 parser.add_argument('-cs', '--curr-step-iterations', type=int, default=35000, help='Number of images for each curriculum step (default: 35000)')
 parser.add_argument('-sp', '--scheduler-patience', type=int, default=10, help='Scheduler patience (default: 10)')
+parser.add_argument('-bs', '--batch-accumulation', type=int, default=8, help='Batch accumulation iterations (default: 8)')
 # Added ontly to downsample scface images at 64 pixels
 parser.add_argument('-ds', '--downsample', action='store_true')
 
@@ -119,21 +120,23 @@ data_manager = DataManager(
 
 
 if __name__ == '__main__':
-    RunManager(
-        student=sm, 
-        teacher=tm, 
-        optimizer=optimizer,
-        scheduler=scheduler,
-        data_manager=data_manager.get_dataset_manager(),
-        dataset=args.dataset,
-        lowering_resolution_prob=args.lowering_resolution_prob,
-        device=device,
-        curriculum=args.curriculum,
-        epochs=args.epochs,
-        lambda_=args.lambda_,
-        train_steps=args.train_steps,
-        run_mode=args.run_mode,
-        super_resolved_images=args.super_resolved_images,
-        out_dir=out_dir
-    ).run()
+    run_manager = RunManager(
+                        student=sm, 
+                        teacher=tm, 
+                        optimizer=optimizer,
+                        scheduler=scheduler,
+                        data_manager=data_manager.get_dataset_manager(),
+                        dataset=args.dataset,
+                        lowering_resolution_prob=args.lowering_resolution_prob,
+                        device=device,
+                        curriculum=args.curriculum,
+                        epochs=args.epochs,
+                        lambda_=args.lambda_,
+                        train_steps=args.train_steps,
+                        run_mode=args.run_mode,
+                        super_resolved_images=args.super_resolved_images,
+                        out_dir=out_dir,
+                        logging=logging
+                    )
+    run_manager.extract_features() if args.run_mode == "extr_feat" else run_manager.run()
     

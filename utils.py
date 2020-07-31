@@ -21,3 +21,18 @@ def load_models(model_base_path, device="cpu", model_ckp=None):
         param.requires_grad = False
     return sm.to(device), tm.to(device)
 
+
+def save_model_checkpoint(best_acc, batch_idx, epoch, model_state_dict, out_dir, logging):
+    state_dict = {
+                'best_acc': best_acc,
+                'epoch': epoch,
+                'model_state_dict': model_state_dict
+            }
+    file_name = os.path.join(out_dir, f'models_ckp_{epoch}_{batch_idx}.pth')
+    torch.save(state_dict, file_name)
+    logging.info(
+            f"Saved model with best acc: {best_acc}"
+            f"\nAt epoch: {epoch}"
+            f"\nAt iter: {batch_idx}"
+            f"\nModel saved at: {file_name}"
+        )
