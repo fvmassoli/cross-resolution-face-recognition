@@ -5,3 +5,9 @@
 *.pth
 *.ipynb
 *.sh
+*.idea
+*.hdf5
+*.sh
+*.jpg
+*.pdf
+*.save
