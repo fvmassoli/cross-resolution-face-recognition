@@ -135,23 +135,23 @@ data_manager = VGGFace2DataManager(
 
 
 if __name__ == '__main__':
-    # run_manager = RunManager(
-    #                     student=sm, 
-    #                     teacher=tm, 
-    #                     optimizer=optimizer,
-    #                     scheduler=scheduler,
-    #                     data_manager=data_manager.get_dataset_manager(),
-    #                     dataset=args.dataset,
-    #                     lowering_resolution_prob=args.lowering_resolution_prob,
-    #                     device=device,
-    #                     curriculum=args.curriculum,
-    #                     epochs=args.epochs,
-    #                     lambda_=args.lambda_,
-    #                     train_steps=args.train_steps,
-    #                     run_mode=args.run_mode,
-    #                     super_resolved_images=args.super_resolved_images,
-    #                     out_dir=out_dir,
-    #                     logging=logging
-    #                 )
-    # run_manager.extract_features() if args.run_mode == "extr_feat" else run_manager.run()
+    run_manager = RunManager(
+                        student=sm, 
+                        teacher=tm, 
+                        optimizer=optimizer,
+                        scheduler=scheduler,
+                        data_manager=data_manager.get_dataset_manager(),
+                        dataset=args.dataset,
+                        lowering_resolution_prob=args.lowering_resolution_prob,
+                        device=device,
+                        curriculum=args.curriculum,
+                        epochs=args.epochs,
+                        lambda_=args.lambda_,
+                        train_steps=args.train_steps,
+                        run_mode=args.run_mode,
+                        super_resolved_images=args.super_resolved_images,
+                        out_dir=out_dir,
+                        logging=logging
+                    )
+    run_manager.run()
     print("finished!!!")
