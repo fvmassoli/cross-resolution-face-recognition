@@ -5,7 +5,7 @@ import torchvision.transforms as t
 
 
 def load_models(model_base_path, device="cpu", model_ckp=None):
-    assert os.path.exists(model_base_path), f"Base model checkpoint not found at: {model_base_path}"
+    assert os.path.exists(model_base_path), "Base model checkpoint not found at: {}".format(model_base_path)
     sm = torch.load(model_base_path)
     tm = torch.load(model_base_path)
     if model_ckp is not None:

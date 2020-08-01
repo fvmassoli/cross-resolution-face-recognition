@@ -1,6 +1,9 @@
 import os
 import numpy as np
 
+from torchvision.datasets import ImageFolder
+from torch.utils.data import DataLoader, Subset
+
 from vggface2_training_data_set import VGGFace2Dataset
 from vggface2_test_data_set import VGGFace2TestDataset
 
@@ -23,7 +26,7 @@ class VGGFace2DataManager():
         self._batch_size = kwargs['batch_size']
         self._num_of_workers = kwargs['num_of_workers']
         self._datasets = self._init_datasets()
-        self._loaders = self._init_data_loaders()
+        self._data_loaders = self._init_data_loaders()
         self._print_summary()
 
     def _init_datasets(self):
@@ -79,21 +82,21 @@ class VGGFace2DataManager():
         return train_data_loader, valid_data_loader_lr, valid_data_loader
             
     def _print_summary(self):
-        self._logging.info("VGGFace2 dataset:")
+        self._logging.info("VGGFace2 data summary:")
         self._logging.info(
-                    f'\tBatch size:                    {self._batch_size}'
-                    f'\n\tNumber of workers:           {self._num_of_workers}'
-                    f'\n\tTraining images:             {len(self._data_loaders[0].dataset)}'
-                    f'\n\tTraining batches:            {len(self._data_loaders[0])}'
-                    f'\n\tValidation images:           {len(self._data_loaders[1].dataset)}'
-                    f'\n\tValidation batches:          {len(self._data_loaders[1])}'
-                    f'\n\tValidation original images:  {len(self._data_loaders[2].dataset)}'
-                    f'\n\tValidation original batches: {len(self._data_loaders[2])}'
-                    f'\n\tPin Memory:                  {self._use_cuda}\n'
+                    f'\tBatch size:                  {self._batch_size}'
+                    f'\n\t\t\t\tNumber of workers:           {self._num_of_workers}'
+                    f'\n\t\t\t\tTraining images:             {len(self._data_loaders[0].dataset)}'
+                    f'\n\t\t\t\tTraining batches:            {len(self._data_loaders[0])}'
+                    f'\n\t\t\t\tValidation images:           {len(self._data_loaders[1].dataset)}'
+                    f'\n\t\t\t\tValidation batches:          {len(self._data_loaders[1])}'
+                    f'\n\t\t\t\tValidation original images:  {len(self._data_loaders[2].dataset)}'
+                    f'\n\t\t\t\tValidation original batches: {len(self._data_loaders[2])}'
+                    f'\n\t\t\t\tPin Memory:                  {self._use_cuda}\n'
                 )
 
     def get_datasets(self):
         return self._datasets
     
     def get_loaders(self):
-        return self._init_data_loaders()        
+        return self._data_loaders        

@@ -19,9 +19,9 @@ class VGGFace2Dataset(Dataset):
         self._curriculum = kwargs['curriculum']
         self._curriculum_index = 0
         if self._train:
-            self._lowering_resolution_prob = 0.1 if self._curriculum else kwargs['lowering_resolution_prob']
+            self._downsampling_prob = 0.1 if self._curriculum else kwargs['downsampling_prob']
         else:
-            self._lowering_resolution_prob = 1.0 # validation
+            self._downsampling_prob = 1.0 # validation
         self._valid_resolution = kwargs['valid_fix_resolution']
         self._classes, self._class_to_idx = self._find_classes()
         self._samples = self._make_dataset()
@@ -29,12 +29,11 @@ class VGGFace2Dataset(Dataset):
         tr = 'training' if self._train else 'validation'
         logging.info(
             f'VGGFace2 custom {tr} dataset info:'
-            f'\n\t\t\t\tRoot folder:               {self._root}'
-            f'\n\t\t\t\tLowering resolution prob:  {self._lowering_resolution_prob}'
-            f'\n\t\t\t\tUse Curriculum:            {self._curriculum and self._train}'
+            f'\n\t\t\t\tRoot folder:       {self._root}'
+            f'\n\t\t\t\tDownsampling prob: {self._downsampling_prob}'
+            f'\n\t\t\t\tUse Curriculum:    {self._curriculum and self._train}'
+            f'\n\t\t\t\tValid resolution:  {self._valid_resolution}'
         )
-        if not self._train:
-            logging.info(f'\t\t\t\tValid resolution:          {self._valid_resolution}')
 
     def _find_classes(self):
         if sys.version_info >= (3, 5):
@@ -98,14 +97,14 @@ class VGGFace2Dataset(Dataset):
     def __getitem__(self, idx):
         if self._train and self._curriculum:
             self._curriculum_index += 1
-            if (self._curriculum_index % self._curr_step_iterations) == 0 and self._lowering_resolution_prob < 1.0:
-                self._lowering_resolution_prob += 0.1
+            if (self._curriculum_index % self._curr_step_iterations) == 0 and self._downsampling_prob < 1.0:
+                self._downsampling_prob += 0.1
         path, label = self._samples[idx]
         img = self._loader(path)
         orig_img = self._loader(path)
-        if torch.rand(1).item() < self._lowering_resolution_prob:
+        if torch.rand(1).item() < self._downsampling_prob:
             img = self._lower_resolution(img)
         if self.transforms:
             img = self.transforms(img)
             orig_img = self.transforms(orig_img)
-        return img, orig_img, label, torch.tensor(self._curriculum_index), torch.tensor(self._lowering_resolution_prob)
+        return img, orig_img, label, torch.tensor(self._curriculum_index), torch.tensor(self._downsampling_prob)

@@ -1,6 +1,8 @@
 import os
+import PIL
 import logging
 import argparse
+import numpy as np
 
 import torch
 from torch.optim import SGD
@@ -14,47 +16,53 @@ from vggface2_data_manager import VGGFace2DataManager
 
 parser = argparse.ArgumentParser("CR-FR")
 # Generic usage
-parser.add_argument('-s', '--seed', type=int, default=41, help='Set random seed (default: 41)')
-# Dataset and run mode
-parser.add_argument('-dn', '--dataset', choices=['tinyface', 'vggface2', 'vggface2-500', 'ijbb', 'ijbc', 'qmul'],
-                default='tinyface', help='Dataset name (default: tinyface)')
-parser.add_argument('-rm', '--run-mode', choices=['train', 'test', 'extr_feat'],
-                default='extr_feat', help='Run mode (default: extr_feat)')
+parser.add_argument('-s', '--seed', type=int, default=41, 
+                help='Set random seed (default: 41)')
 # Model related options
-parser.add_argument('-bp', '--model-base-path', help='Path to base model checkpoint')
-parser.add_argument('-ckp', '--model-ckp', help='Path to fine tuned model checkpoint')
-# Use super resolved images for features extraction
-parser.add_argument('-sr', '--super-resolved-images', action='store_true',
-                help='Extract features from SR images. It is only valid for QMUL and Tinyface (default: False)')
+parser.add_argument('-bp', '--model-base-path', default='./senet50_ft_pytorch.pth', 
+                help='Path to base model checkpoint')
+parser.add_argument('-ckp', '--model-ckp', 
+                help='Path to fine tuned model checkpoint')
+parser.add_argument('-ep', '--experimental-path', default='experiments_results', 
+                help='Output main path')
 # Training Options
-parser.add_argument('-dp', '--dset-base-path', help='Base path to datasets')
+parser.add_argument('-dp', '--dset-base-path', 
+                help='Base path to datasets')
 parser.add_argument('-l', '--lambda_', default=0.2, type=float,
                 help='Lambda for features regression loss (default: 0.2)')
-parser.add_argument('-lr', '--learning-rate', default=0.001, type=float, help='Learning rate (default: 1.e-3)')
-parser.add_argument('-m', '--momentum', default=0.9, type=float, help='Optimizer momentum (default: 0.9)')
-parser.add_argument('-lp', '--lower-resolution-prob', default=0.5, type=float,
-                help='Lowering resoltion probability (default: 0.5)')
+parser.add_argument('-lr', '--learning-rate', default=0.001, type=float, 
+                help='Learning rate (default: 1.e-3)')
+parser.add_argument('-m', '--momentum', default=0.9, type=float, 
+                help='Optimizer momentum (default: 0.9)')
+parser.add_argument('-lp', '--downsampling-prob', default=0.5, type=float,
+                help='Downsampling probability (default: 0.5)')
 parser.add_argument('-e', '--epochs', type=int, default=1, help='Training epochs (default: 1)')
 parser.add_argument('-rs', '--train-steps', type=int, default=2,
                 help='Set number of training iterations before each validation run (default: 2)')
-parser.add_argument('-c', '--curriculum', action='store_true', help='Use curriculum learning (default: False)')
-parser.add_argument('-cs', '--curr-step-iterations', type=int, default=35000, help='Number of images for each curriculum step (default: 35000)')
-parser.add_argument('-sp', '--scheduler-patience', type=int, default=10, help='Scheduler patience (default: 10)')
-parser.add_argument('-bs', '--batch-accumulation', type=int, default=8, help='Batch accumulation iterations (default: 8)')
-# Added ontly to downsample scface images at 64 pixels
-parser.add_argument('-ds', '--downsample', action='store_true')
-
+parser.add_argument('-c', '--curriculum', action='store_true', 
+                help='Use curriculum learning (default: False)')
+parser.add_argument('-cs', '--curr-step-iterations', type=int, default=35000, 
+                help='Number of images for each curriculum step (default: 35000)')
+parser.add_argument('-sp', '--scheduler-patience', type=int, default=10, 
+                help='Scheduler patience (default: 10)')
+parser.add_argument('-b', '--batch-size', type=int, default=8, 
+                help='Batch size (default: 8)')
+parser.add_argument('-ba', '--batch-accumulation', type=int, default=8, 
+                help='Batch accumulation iterations (default: 8)')
+parser.add_argument('-fr', '--valid-fix-resolution', type=int, default=24, 
+                help='Resolution on validation images (default: 8)')
+parser.add_argument('-nw', '--num-workers', type=int, default=1, 
+                help='Number of workers (default: 1)')
 args = parser.parse_args()
 
 
 # ----------------------------- GENERAL ----------------------------------------
 tmp = (
-    f"{args.run_mode}-{args.super_resolved_images}-{args.lambda_}-{args.learning_rate}-"
-    f"{args.lower_resolution_prob}-{args.run_steps}-{args.curriculum}-{args.curr_step_iterations}"
+    f"{args.lambda_}-{args.learning_rate}-{args.downsampling_prob}-"
+    f"{args.train_steps}-{args.curriculum}-{args.curr_step_iterations}"
 )
 
-out_dir = create_folder(args.experimental_path, os.path.join(args.dataset, tmp))
-
+out_dir = os.path.join(args.experimental_path, tmp)
 if not os.path.exists(out_dir):
     os.makedirs(out_dir)
 
@@ -67,9 +75,7 @@ logging.basicConfig(
     ])
 logger = logging.getLogger()
 
-logging.info(f"Training outputs will be saved here: {out_dir}")
-
-logging.info("Start training with params:")
+logging.info(f"Training outputs will be saved at: {out_dir}")
 # ------------------------------------------------------------------------------
 
 
@@ -88,9 +94,9 @@ device = torch.device('cuda' if cuda_available else 'cpu')
 # ---------------- LOAD MODEL & OPTIMIZER & SCHEDULER --------------------------
 sm, tm = load_models(args.model_base_path, device, args.model_ckp)
 optimizer = SGD(
-            parameters=sm.parameters(), 
+            params=sm.parameters(), 
             lr=args.learning_rate, 
-            momentum=args.optimizer_momentum, 
+            momentum=args.momentum, 
             weight_decay=1e-05, 
             nesterov=True
         )
@@ -108,14 +114,14 @@ scheduler = ReduceLROnPlateau(
 
 # ---------------------------- LOAD DATA ---------------------------------------
 kwargs = {
-    'run_mode': args.run_mode, 
     'batch_size': args.batch_size,
-    'lowering_resolution_prob': args.lowering_resolution_prob,
+    'downsampling_prob': args.downsampling_prob,
     'curriculum': args.curriculum,
     'curr_step_iterations': args.curr_step_iterations, 
     'algo_name': 'bilinear',
     'algo_val': PIL.Image.BILINEAR,
     'valid_fix_resolution': args.valid_fix_resolution,
+    'num_of_workers': args.num_workers
 }
 data_manager = VGGFace2DataManager(
                             dataset_path=args.dset_base_path,
@@ -129,23 +135,23 @@ data_manager = VGGFace2DataManager(
 
 
 if __name__ == '__main__':
-    run_manager = RunManager(
-                        student=sm, 
-                        teacher=tm, 
-                        optimizer=optimizer,
-                        scheduler=scheduler,
-                        data_manager=data_manager.get_dataset_manager(),
-                        dataset=args.dataset,
-                        lowering_resolution_prob=args.lowering_resolution_prob,
-                        device=device,
-                        curriculum=args.curriculum,
-                        epochs=args.epochs,
-                        lambda_=args.lambda_,
-                        train_steps=args.train_steps,
-                        run_mode=args.run_mode,
-                        super_resolved_images=args.super_resolved_images,
-                        out_dir=out_dir,
-                        logging=logging
-                    )
-    run_manager.extract_features() if args.run_mode == "extr_feat" else run_manager.run()
-    
+    # run_manager = RunManager(
+    #                     student=sm, 
+    #                     teacher=tm, 
+    #                     optimizer=optimizer,
+    #                     scheduler=scheduler,
+    #                     data_manager=data_manager.get_dataset_manager(),
+    #                     dataset=args.dataset,
+    #                     lowering_resolution_prob=args.lowering_resolution_prob,
+    #                     device=device,
+    #                     curriculum=args.curriculum,
+    #                     epochs=args.epochs,
+    #                     lambda_=args.lambda_,
+    #                     train_steps=args.train_steps,
+    #                     run_mode=args.run_mode,
+    #                     super_resolved_images=args.super_resolved_images,
+    #                     out_dir=out_dir,
+    #                     logging=logging
+    #                 )
+    # run_manager.extract_features() if args.run_mode == "extr_feat" else run_manager.run()
+    print("finished!!!")
