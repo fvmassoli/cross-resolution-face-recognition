@@ -3,8 +3,7 @@ from tqdm import tqdm
 
 import torch.nn.functional as F
 
-from .utils import *
-from params import get_params
+from utils import *
 
 
 class RunManager(object):

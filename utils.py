@@ -40,7 +40,7 @@ def save_model_checkpoint(best_acc, batch_idx, epoch, model_state_dict, out_dir,
         )
 
 
-def get_transforms(resize=256, grayed_prob=0.2, crop_size=224):
+def get_transforms(mode, resize=256, grayed_prob=0.2, crop_size=224):
     def subtract_mean(x):
         mean_vector = [91.4953, 103.8827, 131.0912]
         x *= 255.

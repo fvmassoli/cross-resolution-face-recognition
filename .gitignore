@@ -19,3 +19,4 @@
 *__init__*
 *.pyc
 *_old*
+experiments_results/*

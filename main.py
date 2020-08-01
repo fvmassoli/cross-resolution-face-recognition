@@ -8,8 +8,8 @@ import torch.backends.cudnn as cudnn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from utils import *
-from run_manager.run_manager import RunManager
-from data_manager.data_manager import DataManager
+from run_manager import RunManager
+from vggface2_data_manager import VGGFace2DataManager
 
 
 parser = argparse.ArgumentParser("CR-FR")
@@ -107,17 +107,24 @@ scheduler = ReduceLROnPlateau(
 
 
 # ---------------------------- LOAD DATA ---------------------------------------
-data_manager = DataManager(
-                        dset_base_path=args.dset_base_path,
-                        dataset_name=args.dataset,
-                        super_resolved_images=args.super_resolved_images,
-                        device=device,
-                        run_mode=args.run_mode,
-                        lowering_resolution_prob=args.lower_resolution_prob,
-                        curriculum=args.curriculum,
-                        curr_step_iterations=args.curr_step_iterations,
-                        logging=logging
-                    )
+kwargs = {
+    'run_mode': args.run_mode, 
+    'batch_size': args.batch_size,
+    'lowering_resolution_prob': args.lowering_resolution_prob,
+    'curriculum': args.curriculum,
+    'curr_step_iterations': args.curr_step_iterations, 
+    'algo_name': 'bilinear',
+    'algo_val': PIL.Image.BILINEAR,
+    'valid_fix_resolution': args.valid_fix_resolution,
+}
+data_manager = VGGFace2DataManager(
+                            dataset_path=args.dset_base_path,
+                            img_folders=['train_copied', 'validation'],
+                            transforms=[get_transforms(mode='train'), get_transforms(mode='eval')],
+                            device=device,
+                            logging=logging,
+                            **kwargs
+                        )
 # ------------------------------------------------------------------------------
 
 
