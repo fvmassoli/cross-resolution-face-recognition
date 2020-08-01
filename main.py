@@ -34,8 +34,8 @@ parser.add_argument('-lr', '--learning-rate', default=0.001, type=float,
                 help='Learning rate (default: 1.e-3)')
 parser.add_argument('-m', '--momentum', default=0.9, type=float, 
                 help='Optimizer momentum (default: 0.9)')
-parser.add_argument('-lp', '--downsampling-prob', default=0.5, type=float,
-                help='Downsampling probability (default: 0.5)')
+parser.add_argument('-lp', '--downsampling-prob', default=0.1, type=float,
+                help='Downsampling probability (default: 0.1)')
 parser.add_argument('-e', '--epochs', type=int, default=1, help='Training epochs (default: 1)')
 parser.add_argument('-rs', '--train-steps', type=int, default=2,
                 help='Set number of training iterations before each validation run (default: 2)')
@@ -45,14 +45,14 @@ parser.add_argument('-cs', '--curr-step-iterations', type=int, default=35000,
                 help='Number of images for each curriculum step (default: 35000)')
 parser.add_argument('-sp', '--scheduler-patience', type=int, default=10, 
                 help='Scheduler patience (default: 10)')
-parser.add_argument('-b', '--batch-size', type=int, default=8, 
-                help='Batch size (default: 8)')
+parser.add_argument('-b', '--batch-size', type=int, default=32, 
+                help='Batch size (default: 32)')
 parser.add_argument('-ba', '--batch-accumulation', type=int, default=8, 
                 help='Batch accumulation iterations (default: 8)')
-parser.add_argument('-fr', '--valid-fix-resolution', type=int, default=24, 
+parser.add_argument('-fr', '--valid-fix-resolution', type=int, default=8, 
                 help='Resolution on validation images (default: 8)')
-parser.add_argument('-nw', '--num-workers', type=int, default=1, 
-                help='Number of workers (default: 1)')
+parser.add_argument('-nw', '--num-workers', type=int, default=8, 
+                help='Number of workers (default: 8)')
 args = parser.parse_args()
 
 
@@ -140,18 +140,13 @@ if __name__ == '__main__':
                         teacher=tm, 
                         optimizer=optimizer,
                         scheduler=scheduler,
-                        data_manager=data_manager.get_dataset_manager(),
-                        dataset=args.dataset,
-                        lowering_resolution_prob=args.lowering_resolution_prob,
+                        loaders=data_manager.get_loaders(),
                         device=device,
-                        curriculum=args.curriculum,
-                        epochs=args.epochs,
+                        batch_accumulation=args.batch_accumulation,
                         lambda_=args.lambda_,
                         train_steps=args.train_steps,
-                        run_mode=args.run_mode,
-                        super_resolved_images=args.super_resolved_images,
                         out_dir=out_dir,
                         logging=logging
                     )
-    run_manager.run()
+    run_manager.run(args.epochs)
     print("finished!!!")

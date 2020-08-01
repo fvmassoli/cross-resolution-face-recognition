@@ -54,12 +54,12 @@ def get_transforms(mode, resize=256, grayed_prob=0.2, crop_size=224):
                     t.RandomGrayscale(p=grayed_prob),
                     t.RandomCrop(crop_size),
                     t.ToTensor(),
-                    t.Lambda(lambda x: self._subtract_mean(x))
+                    t.Lambda(lambda x: subtract_mean(x))
                 ])
     else:
         return t.Compose([
                     t.Resize(resize),
                     t.CenterCrop(crop_size),
                     t.ToTensor(),
-                    t.Lambda(lambda x: self._subtract_mean(x))
+                    t.Lambda(lambda x: subtract_mean(x))
                 ])

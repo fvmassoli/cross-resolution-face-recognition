@@ -7,64 +7,46 @@ from utils import *
 
 
 class RunManager(object):
-    def __init__(self, student, teacher, optimizer, scheduler, data_manager, dataset, lowering_resolution_prob,
-                device, curriculum, epochs, batch_accumulation, lambda_, train_steps, run_mode, 
-                super_resolved_images, out_dir, logging):
-        self._studet = student
+    def __init__(self, student, teacher, optimizer, scheduler, loaders, device, 
+                batch_accumulation, lambda_, train_steps, out_dir, logging):
+        self._student = student
         self._teacher = teacher
         self._optimizer = optimizer
         self._scheduler = scheduler
-        self._data_manager = data_manager
-        self._dataset = dataset
-        self._lowering_resolution_prob = lowering_resolution_prob
+        self._train_loader, self._valid_loader_lr, self._valid_loader = loaders
         self._device = device
-        self._curriculum = curriculum
-        self._epochs = epochs
         self._batch_accumulation = batch_accumulation
         self._lambda = lambda_
         self._train_steps = train_steps
-        self._run_mode = run_mode
-        self._super_resolved_images = super_resolved_images
         self._out_dir = out_dir
         self._logging = logging
         self._features_type = np.float32
 
     def _eval_batch(self, loader_idx, data):
         curr_index = -1
-        lowering_resolution_prob = -1
-        items = [item for item in data]
-
-        if loader_idx == 2:  # ImageFolder for original sized images
-            batch = items[0]
-            batch_original = items[0]
-            labels = items[1]
+        downsampling_prob = -1
+        if loader_idx == 0:  # ImageFolder for original sized images
+            batch_original = batch = data[0]
+            labels = data[1]
         else:  # custom data set for down sampled images
-            batch = items[0]
-            batch_original = items[1]
-            labels = items[2]
-            curr_index = items[3]
-            lowering_resolution_prob = items[4]
-
-        teacher_features, teacher_logits = self._teacher(batch_original)
-        student_features, student_logits = self._student(batch)
-
-        y_hat = student_logits.argmax(dim=1)
-        correct_lr = (y_hat == labels).sum().item()
-        
-        loss = F.cross_entropy(student_logits, labels) + self._lambda*F.mse_loss(student_features, teacher_features)
-
-        return loss, student_logits, labels, correct_lr, curr_index, lowering_resolution_prob
+            batch = data[0]
+            batch_original = data[1]
+            labels = data[2]
+            curr_index = data[3]
+            downsampling_prob = data[4]
+        teacher_features, teacher_logits = self._teacher(batch_original.to(self._device))
+        student_features, student_logits = self._student(batch.to(self._device))
+        correct = (student_logits.argmax(dim=1).cpu() == labels).sum().item() 
+        loss = F.cross_entropy(student_logits, labels.to(self._device)) + self._lambda*F.mse_loss(student_features, teacher_features)
+        return loss, student_logits, labels, correct, curr_index, downsampling_prob
 
     def _train(self, epoch):
+        self._logging.info("#"*30)
+        self._logging.info(f'Training at epoch: {epoch}')
+        self._logging.info("#"*30)
+
         self._student.train()
         self._optimizer.zero_grad()
-
-        loader_len, dataset_len = self._data_manager.init_progress_bar_by_index(
-                                                                            idx=0,
-                                                                            pb_description='Training',
-                                                                            pb_leave=False
-                                                                        )
-        local_data_loader = self._data_manager.get_loader_by_index()
 
         j = 1
         loss_ = 0
@@ -72,16 +54,11 @@ class RunManager(object):
         correct_ = 0
         n_samples_ = 0
         nb_backward_steps = 0
-        
-        self._logging.info("#"*30)
-        self._logging.info(f'Training at epoch: {epoch}')
-        self._logging.info("#"*30)
 
-        for batch_idx, data in enumerate(local_data_loader, 1):
+        for batch_idx, data in enumerate(self._train_loader, 1):
 
             if nb_backward_steps == self._train_steps:
                 nb_backward_steps = 0
-                self._student.eval()
                 v_l_, tmp_best_acc = self._val(epoch)
                 self._student.train()
                 self._scheduler.step(v_l_, epoch+1)
@@ -97,18 +74,18 @@ class RunManager(object):
                                     self._logging
                                 )
                 
-            loss, logits, labels, tmp_correct_, curr_index, lowering_resolution_prob = self._eval_batch(loader_idx=0, data=data)
+            loss, logits, labels, correct, curr_index, downsampling_prob = self._eval_batch(loader_idx=-1, data=data)
 
             loss_ += loss.item()
-            correct_ += tmp_correct_
-            n_samples_ += len(labels)
+            correct_ += correct
+            n_samples_ += labels.shape[0]
 
             loss.backward()
             if j % self._batch_accumulation == 0:
                 self._logging.info(
-                            f'Train [{epoch}] - [{batch_idx}]/[{loader_len}] --- '
-                            f'loss: {loss_/batch_idx:.3f} --- acc: {(correct_/n_samples_)*100:.2f}% --- '
-                            f'curr_index: {curr_index[0]} --- lowering_resolution_prob: {lowering_resolution_prob[0]}'
+                            f'Train [{epoch}] - [{batch_idx}]/[{len(self._train_loader)}]:'
+                            f'\n\t\t\t\tLoss LR: {loss_/batch_idx:.3f} --- Acc LR: {(correct_/n_samples_)*100:.2f}%'
+                            f'\n\t\t\t\tcurr_index: {curr_index[0]} --- downsampling_prob: {downsampling_prob[0]}'
                         )
                 j = 1
                 nb_backward_steps += 1
@@ -117,72 +94,33 @@ class RunManager(object):
             else:
                 j += 1
         
-    def _val(self, epoch, test_model=False):
-
-        csv_files = [self._valid_stats_csv, self._valid_stats_orig_csv]
-        desc = [
-            'Model validation on down sampled images',
-            'Model validation on original images',
-            'Model test'
-        ] if self._dataset_path == 'vggface2' else [
-                                                 'Model Validation',
-                                                 'Model Test'
-                                                ]
+    def _val(self, epoch):
+        self._student.eval()
+        
         with torch.no_grad():
-
-            if test_model:
-                loaders_indices = [2]
-            else:
-                if self._dataset_path == 'vggface2':
-                    loaders_indices = [2, 1]
-                else:
-                    loaders_indices = [1]
-
-            for loader_idx in loaders_indices:
-                loader_len, dataset_len = self._data_manager.init_progress_bar_by_index(idx=loader_idx,
-                                                                                        pb_description=desc[loader_idx-1],
-                                                                                        pb_leave=False)
-                local_data_loader = self._data_manager.get_loader_by_index()
-
-                loss_lr = 0.0
-                correct_lr = 0.0
+            for loader_idx, local_loader in enumerate([self._valid_loader, self._valid_loader_lr]):
+                loss_ = 0.0
+                correct_ = 0.0
                 n_samples = 0
+                desc = 'Validaiont HR' if loader_idx == 0 else 'Validation LR'
 
-                for items in local_data_loader:
+                for data in tqdm(local_loader, total=len(local_loader), desc=desc, leave=False):
+                    loss, logits, labels, correct, _, _ = self._eval_batch(loader_idx, data)
 
-                    loss, logits, labels, tmp_correct_, _, _ = self._eval_batch(loader_idx, items)
+                    loss_ += loss.item()
+                    correct_ += correct
+                    n_samples += labels.shape[0]
 
-                    loss_lr += loss.item()
-                    correct_lr += tmp_correct_
-                    n_samples += len(labels)
+                loss_ = loss_ / len(local_loader)
+                acc_ = (correct_ / n_samples) * 100
 
-                    self._data_manager.update_progress_bar()
-
-                loss_ = float(loss_lr) / loader_len
-                acc_ = (float(correct_lr) / n_samples) * 100
-
-                if not test_model:
-                    save_stats_on_csv(file_name=csv_files[loader_idx-1], epoch=epoch, loss=loss_, prec_1=acc_,
-                                      lr=get_current_learning_rate(self._optimizer))
-
-                self._data_manager.close_progress_bar_by_index()
-
-                if test_model:
-                    print('\tTest loss: {:.3f} --- Test acc: {:.2f}%'.format(loss_, acc_))
+                if loader_idx == 0:
+                    self._logging.info(f'Valid loss HR: {loss_:.3f} --- Valid acc HR: {acc_:.2f}%')
                 else:
-                    if self._dataset_path == 'vggface2':
-                        if loader_idx == 1:
-                            print('\tValid loss down sampled imgs: {:.3f} --- Valid acc down sampled imgs: {:.2f}%'.format(loss_, acc_))
-                        else:
-                            print('\tValid loss orig imgs:         {:.3f} --- Valid acc orig imgs:         {:.2f}%'.format(loss_, acc_))
-                    else:
-                        print('\tValid loss: {:.3f} --- Valid acc: {:.2f}%'.format(loss_, acc_))
+                    self._logging.info(f'Valid loss LR: {loss_:.3f} --- Valid acc LR: {acc_:.2f}%')
 
         return loss_, acc_
 
-    def run(self):
-        assert self._dataset == 'vggface2' or self._dataset == 'vggface2-500', f"Training not implemented for dataset: {self._dataset}"
+    def run(self, epochs):
         self._val(0)
-        [self._train(epoch) for epoch in range(1, self._epochs+1)]
-        if self._dataset == 'vggface2-500':
-            self._val(0, test_model=True)
+        [self._train(epoch) for epoch in range(1, epochs+1)]

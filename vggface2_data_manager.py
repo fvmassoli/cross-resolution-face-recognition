@@ -4,8 +4,7 @@ import numpy as np
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader, Subset
 
-from vggface2_training_data_set import VGGFace2Dataset
-from vggface2_test_data_set import VGGFace2TestDataset
+from vggface2_custom_dataset import VGGFace2Dataset
 
 
 class VGGFace2DataManager():
