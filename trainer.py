@@ -6,9 +6,9 @@ import torch.nn.functional as F
 from utils import *
 
 
-class RunManager(object):
-    def __init__(self, student, teacher, optimizer, scheduler, loaders, device, 
-                batch_accumulation, lambda_, train_steps, out_dir, logging):
+class Trainer(object):
+    def __init__(self, student, teacher, optimizer, scheduler, loaders, device, batch_accumulation, 
+                lambda_, train_steps, out_dir, tb_writer, logging):
         self._student = student
         self._teacher = teacher
         self._optimizer = optimizer
@@ -19,6 +19,7 @@ class RunManager(object):
         self._lambda = lambda_
         self._train_steps = train_steps
         self._out_dir = out_dir
+        self._tb_writer = tb_writer
         self._logging = logging
         self._features_type = np.float32
 
@@ -121,6 +122,6 @@ class RunManager(object):
 
         return loss_, acc_
 
-    def run(self, epochs):
+    def train(self, epochs):
         self._val(0)
         [self._train(epoch) for epoch in range(1, epochs+1)]

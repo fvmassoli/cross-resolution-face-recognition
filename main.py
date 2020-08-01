@@ -9,8 +9,10 @@ from torch.optim import SGD
 import torch.backends.cudnn as cudnn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+from tensorboardX import SummaryWriter
+
 from utils import *
-from run_manager import RunManager
+from trainer import Trainer
 from vggface2_data_manager import VGGFace2DataManager
 
 
@@ -25,6 +27,8 @@ parser.add_argument('-ckp', '--model-ckp',
                 help='Path to fine tuned model checkpoint')
 parser.add_argument('-ep', '--experimental-path', default='experiments_results', 
                 help='Output main path')
+parser.add_argument('-tp', '--tensorboard-path', default='experiments_results', 
+                help='Tensorboard main log dir path')
 # Training Options
 parser.add_argument('-dp', '--dset-base-path', 
                 help='Base path to datasets')
@@ -74,6 +78,8 @@ logging.basicConfig(
         logging.StreamHandler()
     ])
 logger = logging.getLogger()
+
+tb_writer = SummaryWriter(os.path.join(args.tensorboard_path, 'tb_runs', tmp))
 
 logging.info(f"Training outputs will be saved at: {out_dir}")
 # ------------------------------------------------------------------------------
@@ -135,18 +141,17 @@ data_manager = VGGFace2DataManager(
 
 
 if __name__ == '__main__':
-    run_manager = RunManager(
-                        student=sm, 
-                        teacher=tm, 
-                        optimizer=optimizer,
-                        scheduler=scheduler,
-                        loaders=data_manager.get_loaders(),
-                        device=device,
-                        batch_accumulation=args.batch_accumulation,
-                        lambda_=args.lambda_,
-                        train_steps=args.train_steps,
-                        out_dir=out_dir,
-                        logging=logging
-                    )
-    run_manager.run(args.epochs)
-    print("finished!!!")
+    Trainer(
+        student=sm, 
+        teacher=tm, 
+        optimizer=optimizer,
+        scheduler=scheduler,
+        loaders=data_manager.get_loaders(),
+        device=device,
+        batch_accumulation=args.batch_accumulation,
+        lambda_=args.lambda_,
+        train_steps=args.train_steps,
+        out_dir=out_dir,
+        tb_writer=tb_writer,
+        logging=logging
+    ).train(args.epochs)
