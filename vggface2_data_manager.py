@@ -9,11 +9,6 @@ from vggface2_custom_dataset import VGGFace2Dataset
 
 class VGGFace2DataManager():
     def __init__(self, dataset_path, img_folders, transforms, device, logging, **kwargs):
-        loaders_names = [
-                    'VGGFace2 training', 
-                    'VGGFace2 validation down sampled',
-                    'VGGFace2 validation'
-                ]
         self._dataset_path = dataset_path
         self._train_img_folders = img_folders[0]
         self._valid_img_folders = img_folders[1]
@@ -93,9 +88,6 @@ class VGGFace2DataManager():
                     f'\n\t\t\t\tValidation original batches: {len(self._data_loaders[2])}'
                     f'\n\t\t\t\tPin Memory:                  {self._use_cuda}\n'
                 )
-
-    def get_datasets(self):
-        return self._datasets
     
     def get_loaders(self):
         return self._data_loaders        

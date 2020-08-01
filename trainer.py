@@ -21,7 +21,8 @@ class Trainer(object):
         self._out_dir = out_dir
         self._tb_writer = tb_writer
         self._logging = logging
-        self._features_type = np.float32
+        self._it_t = 0
+        self._it_v = 0
 
     def _eval_batch(self, loader_idx, data):
         curr_index = -1
@@ -85,13 +86,19 @@ class Trainer(object):
             if j % self._batch_accumulation == 0:
                 self._logging.info(
                             f'Train [{epoch}] - [{batch_idx}]/[{len(self._train_loader)}]:'
-                            f'\n\t\t\t\tLoss LR: {loss_/batch_idx:.3f} --- Acc LR: {(correct_/n_samples_)*100:.2f}%'
-                            f'\n\t\t\t\tcurr_index: {curr_index[0]} --- downsampling_prob: {downsampling_prob[0]}'
+                            f'\n\t\t\tLoss LR: {loss_/batch_idx:.3f} --- Acc LR: {(correct_/n_samples_)*100:.2f}%'
+                            f'\n\t\t\tcurr_index: {curr_index[0]} --- downsampling_prob: {downsampling_prob[0]}'
                         )
+                if nb_backward_steps%5 == 1:
+                    self._it_t += 1
+                    self._tb_writer.add_scalar('train/loss', loss_/batch_idx, self._it_t)
+                    self._tb_writer.add_scalar('train/accuracy', correct_/n_samples_, self._it_t)
+                
                 j = 1
                 nb_backward_steps += 1
                 self._optimizer.step()
                 self._optimizer.zero_grad()
+
             else:
                 j += 1
         
@@ -117,8 +124,14 @@ class Trainer(object):
 
                 if loader_idx == 0:
                     self._logging.info(f'Valid loss HR: {loss_:.3f} --- Valid acc HR: {acc_:.2f}%')
+                    self._tb_writer.add_scalar('validation/loss_hr', loss_, self._it_v)
+                    self._tb_writer.add_scalar('validation/accuracy_hr', acc_, self._it_v)
                 else:
                     self._logging.info(f'Valid loss LR: {loss_:.3f} --- Valid acc LR: {acc_:.2f}%')
+                    self._tb_writer.add_scalar('validation/loss_lr', loss_, self._it_v)
+                    self._tb_writer.add_scalar('validation/accuracy_lr', acc_, self._it_v)
+
+        self._it_v += 1
 
         return loss_, acc_
 
