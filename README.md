@@ -4,8 +4,6 @@ This repository contains the code relative to the paper "[Cross-resolution learn
 
 It reports a new training procedure for cross-resolution robust deep neural network. 
 
-**(WIP ... all the code will be soon available)**
-
 ## Cross-resolution training
 
 Proposed training approach
@@ -21,6 +19,14 @@ Proposed training approach
 <img src="https://github.com/fvmassoli/cross-resolution-face-recognition/blob/master/images/vggface_tsne_base_ft_models_8.png" alt="t-SNE" width="700" height="300">
 </p>
 
+## How to run the code
+The current version of the code requires python3 and PyTorch >= 0.4.
+
+To run the training, you have to supply the path to the checkpoit for the base model and the dataset folder. Inside the dataset folder, the code expects to find two subdirs: "train" and "validation".
+
+```
+python3 -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
+```
 
 ## Reference
 For all the details about the training procedure and the experimental results, please have a look at the [paper](https://www.sciencedirect.com/science/article/pii/S0262885620300597).
