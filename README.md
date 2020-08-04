@@ -22,10 +22,12 @@ Proposed training approach
 ## How to run the code
 The current version of the code requires python3 and PyTorch >= 0.4.
 
-To run the training, you have to supply the path to the checkpoit for the base model and the dataset folder. Inside the dataset folder, the code expects to find two subdirs: "train" and "validation".
+Inside the dataset folder, the code expects to find two subdirs: "train" and "validation".
+
+Minimal usage:
 
 ```
-python3 -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
+python -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
 ```
 
 ## Reference
