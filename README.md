@@ -20,7 +20,7 @@ Proposed training approach
 </p>
 
 ## How to run the code
-The current version of the code requires python3 and PyTorch >= 0.4.
+The current version of the code requires python3.
 
 Inside the dataset folder, the code expects to find two subdirs: "train" and "validation".
 
