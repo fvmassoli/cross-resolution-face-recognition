@@ -20,7 +20,7 @@ Proposed training approach
 </p>
 
 ## How to run the code
-The current version of the code requires python3.
+The current version of the code requires python 3.6 and pytorch 1.4.0.
 
 Inside the dataset folder, the code expects to find two subdirs: "train" and "validation".
 
@@ -30,7 +30,7 @@ Minimal usage:
 python -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
 ```
 
-The base model is the SE-ResNet-50 (pretrained) that is available in the github repo of VGGFace2 (https://github.com/ox-vgg/vgg_face2)
+The base model is the SE-ResNet-50 (pretrained) that is available here: https://drive.google.com/file/d/17AVPBQFtrIJwo3yPm4sNls7ZSyswFsvT/view?usp=sharing
 
 ## Reference
 For all the details about the training procedure and the experimental results, please have a look at the [paper](https://www.sciencedirect.com/science/article/pii/S0262885620300597).
