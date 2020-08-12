@@ -30,6 +30,8 @@ Minimal usage:
 python -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
 ```
 
+The base model is the SE-ResNet-50 (pretrained) that is available in the github repo of VGGFace2 (https://github.com/ox-vgg/vgg_face2)
+
 ## Reference
 For all the details about the training procedure and the experimental results, please have a look at the [paper](https://www.sciencedirect.com/science/article/pii/S0262885620300597).
 
