@@ -131,7 +131,7 @@ kwargs = {
 }
 data_manager = VGGFace2DataManager(
                             dataset_path=args.dset_base_path,
-                            img_folders=['train_copied', 'validation'],
+                            img_folders=['train', 'validation'],
                             transforms=[get_transforms(mode='train'), get_transforms(mode='eval')],
                             device=device,
                             logging=logging,
