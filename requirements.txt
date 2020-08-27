@@ -1,4 +1,4 @@
-python=3.6.9
+python==3.6.9
 h5py==2.10.0
 matplotlib==3.2.0
 notebook==6.0.3
