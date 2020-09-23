@@ -32,17 +32,19 @@ parser.add_argument('-tp', '--tensorboard-path', default='experiments_results',
 # Training Options
 parser.add_argument('-dp', '--dset-base-path', 
                 help='Base path to datasets')
-parser.add_argument('-l', '--lambda_', default=0.2, type=float,
-                help='Lambda for features regression loss (default: 0.2)')
+parser.add_argument('-l', '--lambda_', default=0.1, type=float,
+                help='Lambda for features regression loss (default: 0.1)')
 parser.add_argument('-lr', '--learning-rate', default=0.001, type=float, 
                 help='Learning rate (default: 1.e-3)')
 parser.add_argument('-m', '--momentum', default=0.9, type=float, 
                 help='Optimizer momentum (default: 0.9)')
+parser.add_argument('-nt', '--nesterov', action='store_true',
+                help='Use Nesterov (default: False)')
 parser.add_argument('-lp', '--downsampling-prob', default=0.1, type=float,
                 help='Downsampling probability (default: 0.1)')
 parser.add_argument('-e', '--epochs', type=int, default=1, help='Training epochs (default: 1)')
-parser.add_argument('-rs', '--train-steps', type=int, default=2,
-                help='Set number of training iterations before each validation run (default: 2)')
+parser.add_argument('-rs', '--train-steps', type=int, default=1,
+                help='Set number of training iterations before each validation run (default: 1)')
 parser.add_argument('-c', '--curriculum', action='store_true', 
                 help='Use curriculum learning (default: False)')
 parser.add_argument('-cs', '--curr-step-iterations', type=int, default=35000, 
@@ -103,8 +105,8 @@ optimizer = SGD(
             params=sm.parameters(), 
             lr=args.learning_rate, 
             momentum=args.momentum, 
-            weight_decay=1e-05, 
-            nesterov=True
+            weight_decay=5e-04, 
+            nesterov=args.nesterov
         )
 scheduler = ReduceLROnPlateau(
                         optimizer=optimizer, 

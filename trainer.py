@@ -112,9 +112,9 @@ class Trainer(object):
                 n_samples = 0
                 desc = 'Validaiont HR' if loader_idx == 0 else 'Validation LR'
 
-                for data in tqdm(local_loader, total=len(local_loader), desc=desc, leave=False):
+                for batch_id, data in enumerate(tqdm(local_loader, total=len(local_loader), desc=desc, leave=False)):
                     loss, logits, labels, correct, _, _ = self._eval_batch(loader_idx, data)
-
+                    
                     loss_ += loss.item()
                     correct_ += correct
                     n_samples += labels.shape[0]
