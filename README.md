@@ -35,6 +35,8 @@ The base model is the SE-ResNet-50 (pretrained) that is available here: https://
 ## Reference
 For all the details about the training procedure and the experimental results, please have a look at the [paper](https://www.sciencedirect.com/science/article/pii/S0262885620300597).
 
+To cite our work, please use the following form
+
 ```
 @article{massoli2020cross,
   title={Cross-resolution learning for Face Recognition},
