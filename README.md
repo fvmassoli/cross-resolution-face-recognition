@@ -32,6 +32,10 @@ python -W ignore main.py --model-base-path path_to_base_model_weight_file --dset
 
 The base model is the SE-ResNet-50 (pretrained) that is available here: https://drive.google.com/file/d/17AVPBQFtrIJwo3yPm4sNls7ZSyswFsvT/view?usp=sharing
 
+**BE VERY CAREFUL**
+
+When you download the VGGFace2 dataset, you should NOT use the test set while training. To create a validation set, just take a subset of the training set
+
 ## Reference
 For all the details about the training procedure and the experimental results, please have a look at the [paper](https://www.sciencedirect.com/science/article/pii/S0262885620300597).
 
