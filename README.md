@@ -4,6 +4,9 @@ This repository contains the code relative to the paper "[Cross-resolution learn
 
 It reports a new training procedure for cross-resolution robust deep neural network. 
 
+**Please note:** 
+We are researchers, not a software company, and have no personnel devoted to documenting and maintaing this research code. Therefore this code is offered "AS IS". Exact reproduction of the numbers in the paper depends on exact reproduction of many factors, including the version of all software dependencies and the choice of underlying hardware (GPU model, etc). Therefore you should expect to need to re-tune your hyperparameters slightly for your new setup.
+
 ## Cross-resolution training
 
 Proposed training approach
