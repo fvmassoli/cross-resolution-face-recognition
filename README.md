@@ -33,7 +33,9 @@ Minimal usage:
 python -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
 ```
 
-The base model is the SE-ResNet-50 (pretrained) that is available here: https://drive.google.com/file/d/17AVPBQFtrIJwo3yPm4sNls7ZSyswFsvT/view?usp=sharing
+The base model is the SE-ResNet-50 (pretrained on the VGGFace2 dataset) that is available here: https://github.com/ox-vgg/vgg_face2.
+
+The model is the SE-ResNet-50 with features dim = 2048.
 
 **BE VERY CAREFUL**
 
