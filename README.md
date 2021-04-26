@@ -33,7 +33,7 @@ Minimal usage:
 python -W ignore main.py --model-base-path path_to_base_model_weight_file --dset-base-path path_to_data_folder 
 ```
 
-The base model is the SE-ResNet-50 (pretrained on the VGGFace2 dataset) that is available [here](https://cnrsc-my.sharepoint.com/personal/fabrizio_falchi_cnr_it/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Ffabrizio%5Ffalchi%5Fcnr%5Fit%2FDocuments%2FSharedByLilnk%2Fpaper%5Fcheckpoints%2Fsenet50%5Fft%5Fpytorch%2Ept&parent=%2Fpersonal%2Ffabrizio%5Ffalchi%5Fcnr%5Fit%2FDocuments%2FSharedByLilnk%2Fpaper%5Fcheckpoints&originalPath=aHR0cHM6Ly9jbnJzYy1teS5zaGFyZXBvaW50LmNvbS86dTovZy9wZXJzb25hbC9mYWJyaXppb19mYWxjaGlfY25yX2l0L0VmbzlLNDZMRWtWTXB6Tjlnd2l0MEpZQlk3MVdpUWZzdFBjOUN2R1VITjRfQmc%5FcnRpbWU9YkZOWUJRUUQyVWc).
+The base model is the SE-ResNet-50 (pretrained on the VGGFace2 dataset) that is available [here](https://github.com/fvmassoli/cross-resolution-face-recognition/releases/tag/v1.0).
 
 The model is the SE-ResNet-50 with features dim = 2048.
 
