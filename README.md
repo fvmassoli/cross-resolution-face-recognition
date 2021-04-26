@@ -60,7 +60,5 @@ To cite our work, please use the following form
 ## Contacts & Model Request
 If you have any question about our work, please contact [Dr. Fabio Valerio Massoli](mailto:fabio.massoli@isti.cnr.it). 
 
-We make our cross-resolution best model available to researchers upon request to: [Dr. Fabio Valerio Massoli](mailto:fabio.massoli@isti.cnr.it).
-
 
 Have fun! :-D
