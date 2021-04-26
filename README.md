@@ -60,5 +60,6 @@ To cite our work, please use the following form
 ## Contacts & Model Request
 If you have any question about our work, please contact [Dr. Fabio Valerio Massoli](mailto:fabio.massoli@isti.cnr.it). 
 
+**Currently, we cannot supply the trained model checkpoint.**
 
 Have fun! :-D
