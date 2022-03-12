@@ -6,7 +6,7 @@ numpy==1.18.4
 opencv-python==4.0.0.21
 pandas==1.0.4
 pickle==4.0
-Pillow==7.0.0
+Pillow==9.0.1
 psutil==5.6.7
 pymc3==3.7
 scikit-image==0.14.2
